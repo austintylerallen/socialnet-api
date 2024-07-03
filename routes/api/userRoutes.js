@@ -16,8 +16,8 @@ router.get('/', async (req, res) => {
 router.get('/:userId', async (req, res) => {
   try {
     const userId = req.params.userId;
-    console.log('Received userId:', userId);  // Debug log
 
+    // Validate userId as ObjectId
     if (!mongoose.Types.ObjectId.isValid(userId)) {
       return res.status(400).json({ error: 'Invalid userId' });
     }
@@ -38,7 +38,14 @@ router.get('/:userId', async (req, res) => {
 // POST create a new user
 router.post('/', async (req, res) => {
   try {
-    const newUser = await User.create(req.body);
+    const { username, email } = req.body;
+
+    // Ensure both fields are provided
+    if (!username || !email) {
+      return res.status(400).json({ error: 'Username and email are required' });
+    }
+
+    const newUser = await User.create({ username, email });
     res.status(201).json(newUser);
   } catch (err) {
     res.status(400).json(err);
@@ -48,13 +55,7 @@ router.post('/', async (req, res) => {
 // PUT update a user by ID
 router.put('/:userId', async (req, res) => {
   try {
-    const userId = req.params.userId;
-
-    if (!mongoose.Types.ObjectId.isValid(userId)) {
-      return res.status(400).json({ error: 'Invalid userId' });
-    }
-
-    const updatedUser = await User.findByIdAndUpdate(userId, req.body, {
+    const updatedUser = await User.findByIdAndUpdate(req.params.userId, req.body, {
       new: true,
       runValidators: true,
     });
@@ -70,13 +71,7 @@ router.put('/:userId', async (req, res) => {
 // DELETE a user by ID
 router.delete('/:userId', async (req, res) => {
   try {
-    const userId = req.params.userId;
-
-    if (!mongoose.Types.ObjectId.isValid(userId)) {
-      return res.status(400).json({ error: 'Invalid userId' });
-    }
-
-    const deletedUser = await User.findByIdAndDelete(userId);
+    const deletedUser = await User.findByIdAndDelete(req.params.userId);
     if (!deletedUser) {
       return res.status(404).json({ message: 'User not found' });
     }

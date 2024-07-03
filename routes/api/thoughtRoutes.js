@@ -1,4 +1,5 @@
 const router = require('express').Router();
+const mongoose = require('mongoose');
 const { Thought } = require('../../models');
 
 // GET all thoughts
@@ -7,7 +8,8 @@ router.get('/', async (req, res) => {
     const thoughts = await Thought.find();
     res.json(thoughts);
   } catch (err) {
-    res.status(500).json(err);
+    console.error('Error fetching thoughts:', err.message);
+    res.status(500).json({ error: 'Server error', message: err.message });
   }
 });
 
@@ -15,7 +17,6 @@ router.get('/', async (req, res) => {
 router.get('/:thoughtId', async (req, res) => {
   try {
     const thoughtId = req.params.thoughtId;
-    console.log('Received thoughtId:', thoughtId);  // Debug log
 
     if (!mongoose.Types.ObjectId.isValid(thoughtId)) {
       return res.status(400).json({ error: 'Invalid thoughtId' });
@@ -27,7 +28,8 @@ router.get('/:thoughtId', async (req, res) => {
     }
     res.json(thought);
   } catch (err) {
-    res.status(500).json(err);
+    console.error('Error fetching thought by ID:', err.message);
+    res.status(500).json({ error: 'Server error', message: err.message });
   }
 });
 
@@ -37,7 +39,8 @@ router.post('/', async (req, res) => {
     const newThought = await Thought.create(req.body);
     res.status(201).json(newThought);
   } catch (err) {
-    res.status(400).json(err);
+    console.error('Error creating thought:', err.message);
+    res.status(400).json({ error: 'Bad Request', message: err.message });
   }
 });
 
@@ -59,7 +62,8 @@ router.put('/:thoughtId', async (req, res) => {
     }
     res.json(updatedThought);
   } catch (err) {
-    res.status(400).json(err);
+    console.error('Error updating thought:', err.message);
+    res.status(400).json({ error: 'Bad Request', message: err.message });
   }
 });
 
@@ -78,7 +82,8 @@ router.delete('/:thoughtId', async (req, res) => {
     }
     res.json({ message: 'Thought deleted successfully' });
   } catch (err) {
-    res.status(500).json(err);
+    console.error('Error deleting thought:', err.message);
+    res.status(500).json({ error: 'Server error', message: err.message });
   }
 });
 
