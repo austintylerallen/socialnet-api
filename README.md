@@ -1,105 +1,136 @@
-# Social Network API
+Social Media API
+================
 
-This project is a social network API built with Express.js, MongoDB, and Mongoose. The API allows users to share their thoughts, react to friends' thoughts, and manage their friend list. 
+This project is a RESTful API for a social media platform, allowing users to manage their profiles, thoughts, friends, and reactions.
 
-## Table of Contents
+Features
+--------
 
-- [Installation](#installation)
-- [Usage](#usage)
-- [API Endpoints](#api-endpoints)
-- [Data Models](#data-models)
-- [Seeding the Database](#seeding-the-database)
-- [License](#license)
+-   **Users:**
 
-## Installation
+    -   Manage user profiles with unique usernames and emails.
+    -   Add friends to a user's friend list.
+    -   Update and delete user profiles.
+-   **Thoughts:**
 
-1. Clone the repository to your local machine:
-    ```sh
-    git clone https://github.com/austintylerallen/socialnet-api.git
-    ```
+    -   Create, update, delete, and retrieve thoughts.
+    -   Add and remove reactions to thoughts.
 
-2. Navigate to the project directory:
-    ```sh
-    cd socialnet-api
-    ```
+Technologies Used
+-----------------
 
-3. Install the dependencies:
-    ```sh
-    npm install
-    ```
+-   Node.js
+-   Express.js
+-   MongoDB
+-   Mongoose
+-   Insomnia (for API testing)
 
-4. Set up your `.env` file with the following variable:
-    ```sh
-    MONGODB_URI=mongodb://localhost:27017/clusterreps
-    ```
+Getting Started
+---------------
 
-## Usage
+To run this project locally, follow these steps:
 
-1. Start the MongoDB server (if not already running):
-    ```sh
-    mongod --config /opt/homebrew/etc/mongod.conf
-    ```
+1.  Clone the repository:
 
-2. Seed the database with initial data:
-    ```sh
-    node seeds/seed.js
-    ```
+    bash
 
-3. Start the Express server:
-    ```sh
-    npm start
-    ```
+    `git clone <www.github.com/austintylerallen/socialnet-api>
+    cd socialnet-api`
 
-4. Access the API at `http://localhost:3001/api`.
+2.  Install dependencies:
 
-## API Endpoints
+    bash
+
+    `npm install`
+
+3.  Set up your environment variables:
+
+    Create a `.env` file in the root directory with the following variables:
+
+    bash
+
+    `PORT=3001
+    MONGODB_URI=mongodb://localhost:27017/social-media-db`
+
+4.  Start the server:
+
+    bash
+
+    `npm start`
+
+5.  Use Insomnia or any API testing tool to interact with the endpoints.
+
+API Endpoints
+-------------
 
 ### Users
 
-- **GET** `/api/users` - Get all users
-- **GET** `/api/users/:userId` - Get a single user by ID
-- **POST** `/api/users` - Create a new user
-    ```json
-    {
-      "username": "new_user",
-      "email": "new_user@example.com"
-    }
-    ```
-- **PUT** `/api/users/:userId` - Update a user by ID
-- **DELETE** `/api/users/:userId` - Delete a user by ID
+-   **GET All Users:**
+
+    -   `GET /api/users`
+    -   Retrieve all users.
+-   **GET User by ID:**
+
+    -   `GET /api/users/:id`
+    -   Retrieve a user by ID.
+-   **POST Create User:**
+
+    -   `POST /api/users`
+    -   Create a new user.
+-   **PUT Update User by ID:**
+
+    -   `PUT /api/users/:id`
+    -   Update a user by ID.
+-   **DELETE Delete User by ID:**
+
+    -   `DELETE /api/users/:id`
+    -   Delete a user by ID.
+-   **POST Add Friend to User's Friend List:**
+
+    -   `POST /api/users/:userId/friends/:friendId`
+    -   Add a friend to a user's friend list.
+-   **DELETE Remove Friend from User's Friend List:**
+
+    -   `DELETE /api/users/:userId/friends/:friendId`
+    -   Remove a friend from a user's friend list.
 
 ### Thoughts
 
-- **GET** `/api/thoughts` - Get all thoughts
-- **GET** `/api/thoughts/:thoughtId` - Get a single thought by ID
-- **POST** `/api/thoughts` - Create a new thought
-    ```json
-    {
-      "thoughtText": "This is a new thought",
-      "username": "user_username"
-    }
-    ```
-- **PUT** `/api/thoughts/:thoughtId` - Update a thought by ID
-- **DELETE** `/api/thoughts/:thoughtId` - Delete a thought by ID
+-   **GET All Thoughts:**
 
-### Friends
+    -   `GET /api/thoughts`
+    -   Retrieve all thoughts.
+-   **GET Thought by ID:**
 
-- **POST** `/api/users/:userId/friends/:friendId` - Add a friend
-- **DELETE** `/api/users/:userId/friends/:friendId` - Remove a friend
+    -   `GET /api/thoughts/:id`
+    -   Retrieve a thought by ID.
+-   **POST Create Thought:**
 
-### Reactions
+    -   `POST /api/thoughts`
+    -   Create a new thought.
+-   **PUT Update Thought by ID:**
 
-- **POST** `/api/thoughts/:thoughtId/reactions` - Add a reaction to a thought
-- **DELETE** `/api/thoughts/:thoughtId/reactions/:reactionId` - Remove a reaction from a thought
+    -   `PUT /api/thoughts/:id`
+    -   Update a thought by ID.
+-   **DELETE Delete Thought by ID:**
 
-## Data Models
+    -   `DELETE /api/thoughts/:id`
+    -   Delete a thought by ID.
+-   **POST Add Reaction to Thought:**
 
-### User
+    -   `POST /api/thoughts/:thoughtId/reactions`
+    -   Add a reaction to a thought.
+-   **DELETE Remove Reaction from Thought:**
 
-```json
-{
-  "username": "String (unique, required)",
-  "email": "String (unique, required, must match a valid email address)",
-  "thoughts": ["Array of _id values referencing the Thought model"],
-  "friends": ["Array of _id values referencing the User model (self-reference)"]
-}
+    -   `DELETE /api/thoughts/:thoughtId/reactions/:reactionId`
+    -   Remove a reaction from a thought.
+
+Walkthrough Video
+-----------------
+
+For a detailed demonstration of the API's functionality, watch our walkthrough video provided in the links provided for this assignment.
+
+Contributing
+------------
+
+Feel free to contribute to this project by submitting issues or pull requests.
