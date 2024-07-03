@@ -1,7 +1,5 @@
 const User = require('../models/User');
 
-// Controller functions
-
 // GET all users
 const getAllUsers = async (req, res) => {
   try {
