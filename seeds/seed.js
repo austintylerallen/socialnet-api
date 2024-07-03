@@ -1,66 +1,62 @@
-require('dotenv').config(); // Load environment variables from .env file
+// seed.js
 
 const mongoose = require('mongoose');
-const { User, Thought } = require('../models'); // Adjust the path as necessary
+const dotenv = require('dotenv');
+const usersSeedData = require('./usersSeedData');
+const thoughtsSeedData = require('./thoughtsSeedData');
+const User = require('../models/User'); // Adjust the path as per your project structure
+const Thought = require('../models/Thought'); // Adjust the path as per your project structure
 
-// Check if the MONGODB_URI is defined
-if (!process.env.MONGODB_URI) {
-  console.error('Error: MONGODB_URI is not defined in .env file');
-  process.exit(1);
-}
+dotenv.config();
 
 // Connect to MongoDB
 mongoose.connect(process.env.MONGODB_URI, {
   useNewUrlParser: true,
-  useUnifiedTopology: true,
+  useUnifiedTopology: true
 });
 
-const db = mongoose.connection;
+mongoose.set('debug', true);
 
-db.on('error', console.error.bind(console, 'MongoDB connection error:'));
-
-db.once('open', async () => {
-  console.log('MongoDB connected successfully');
-
+// Seed function
+async function seedDatabase() {
   try {
-    // Clear existing data
-    await User.deleteMany({});
-    await Thought.deleteMany({});
+    // Clear existing data (optional)
+    await User.deleteMany();
+    await Thought.deleteMany();
 
-    // Insert demo users and thoughts
-    const thought1 = await Thought.create({
-      _id: new mongoose.Types.ObjectId(),
-      thoughtText: 'This is a thought by John',
-      username: 'john_doe',
-    });
+    // Seed users
+    const createdUsers = await User.insertMany(usersSeedData);
+    console.log(`${createdUsers.length} users seeded.`);
 
-    const thought2 = await Thought.create({
-      _id: new mongoose.Types.ObjectId(),
-      thoughtText: 'This is a thought by Jane',
-      username: 'jane_doe',
-    });
+    // Establish friendships
+    const user1 = createdUsers.find(user => user.username === 'user1');
+    const user2 = createdUsers.find(user => user.username === 'user2');
+    
+    // Example: User1 adds User2 as a friend
+    user1.friends.push(user2._id);
 
-    const user1 = await User.create({
-      username: 'john_doe',
-      email: 'john@example.com',
-      thoughts: [thought1._id],
-    });
+    // Example: User2 adds User1 as a friend
+    user2.friends.push(user1._id);
 
-    const user2 = await User.create({
-      username: 'jane_doe',
-      email: 'jane@example.com',
-      thoughts: [thought2._id],
-    });
+    // Save updated users with friends
+    await user1.save();
+    await user2.save();
 
-    console.log('Inserted demo users and thoughts');
-    console.log('User 1 ID:', user1._id);
-    console.log('User 2 ID:', user2._id);
-    console.log('Thought 1 ID:', thought1._id);
-    console.log('Thought 2 ID:', thought2._id);
+    // Seed thoughts
+    const thoughtsWithUserIds = thoughtsSeedData.map(thought => ({
+      ...thought,
+      userId: createdUsers.find(user => user.username === thought.username)._id
+    }));
+    const createdThoughts = await Thought.insertMany(thoughtsWithUserIds);
+    console.log(`${createdThoughts.length} thoughts seeded.`);
 
+    console.log('Database seeding completed.');
   } catch (err) {
-    console.error(err);
+    console.error('Error seeding database:', err);
   } finally {
-    mongoose.connection.close();
+    mongoose.disconnect();
   }
-});
+}
+
+// Execute seed function
+seedDatabase();

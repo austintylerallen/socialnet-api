@@ -1,90 +1,33 @@
 const router = require('express').Router();
-const mongoose = require('mongoose');
-const { Thought } = require('../../models');
+const {
+  getAllThoughts,
+  getThoughtById,
+  createThought,
+  updateThought,
+  deleteThought,
+  addReaction,
+  removeReaction,
+} = require('../../controllers/thoughtController');
 
 // GET all thoughts
-router.get('/', async (req, res) => {
-  try {
-    const thoughts = await Thought.find();
-    res.json(thoughts);
-  } catch (err) {
-    console.error('Error fetching thoughts:', err.message);
-    res.status(500).json({ error: 'Server error', message: err.message });
-  }
-});
+router.get('/', getAllThoughts);
 
-// GET a single thought by ID
-router.get('/:thoughtId', async (req, res) => {
-  try {
-    const thoughtId = req.params.thoughtId;
+// GET thought by ID
+router.get('/:id', getThoughtById);
 
-    if (!mongoose.Types.ObjectId.isValid(thoughtId)) {
-      return res.status(400).json({ error: 'Invalid thoughtId' });
-    }
+// POST new thought
+router.post('/', createThought);
 
-    const thought = await Thought.findById(thoughtId);
-    if (!thought) {
-      return res.status(404).json({ message: 'Thought not found' });
-    }
-    res.json(thought);
-  } catch (err) {
-    console.error('Error fetching thought by ID:', err.message);
-    res.status(500).json({ error: 'Server error', message: err.message });
-  }
-});
+// PUT update thought by ID
+router.put('/:id', updateThought);
 
-// POST create a new thought
-router.post('/', async (req, res) => {
-  try {
-    const newThought = await Thought.create(req.body);
-    res.status(201).json(newThought);
-  } catch (err) {
-    console.error('Error creating thought:', err.message);
-    res.status(400).json({ error: 'Bad Request', message: err.message });
-  }
-});
+// DELETE thought by ID
+router.delete('/:id', deleteThought);
 
-// PUT update a thought by ID
-router.put('/:thoughtId', async (req, res) => {
-  try {
-    const thoughtId = req.params.thoughtId;
+// POST add a reaction to thought
+router.post('/:thoughtId/reactions', addReaction);
 
-    if (!mongoose.Types.ObjectId.isValid(thoughtId)) {
-      return res.status(400).json({ error: 'Invalid thoughtId' });
-    }
-
-    const updatedThought = await Thought.findByIdAndUpdate(thoughtId, req.body, {
-      new: true,
-      runValidators: true,
-    });
-    if (!updatedThought) {
-      return res.status(404).json({ message: 'Thought not found' });
-    }
-    res.json(updatedThought);
-  } catch (err) {
-    console.error('Error updating thought:', err.message);
-    res.status(400).json({ error: 'Bad Request', message: err.message });
-  }
-});
-
-// DELETE a thought by ID
-router.delete('/:thoughtId', async (req, res) => {
-  try {
-    const thoughtId = req.params.thoughtId;
-
-    if (!mongoose.Types.ObjectId.isValid(thoughtId)) {
-      return res.status(400).json({ error: 'Invalid thoughtId' });
-    }
-
-    const deletedThought = await Thought.findByIdAndDelete(thoughtId);
-    if (!deletedThought) {
-      return res.status(404).json({ message: 'Thought not found' });
-    }
-    res.json({ message: 'Thought deleted successfully' });
-  } catch (err) {
-    console.error('Error deleting thought:', err.message);
-    res.status(500).json({ error: 'Server error', message: err.message });
-  }
-});
+// DELETE remove a reaction from thought
+router.delete('/:thoughtId/reactions/:reactionId', removeReaction);
 
 module.exports = router;

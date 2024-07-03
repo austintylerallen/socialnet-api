@@ -1,32 +1,42 @@
 const express = require('express');
-const db = require('./config/connection');
-const routes = require('./routes');
+const mongoose = require('mongoose');
+const dotenv = require('dotenv');
+
+dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3001;
 
 // Middleware
-app.use(express.json()); // Parse JSON bodies
-app.use(express.urlencoded({ extended: true })); // Parse URL-encoded bodies
-app.use(express.static('public')); // Serve static files from the 'public' directory
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-// API routes
-app.use('/api', routes); // Mount API routes under '/api'
-
-// Serve index.html for the root route
-app.get('/', (req, res) => {
-  res.sendFile(__dirname + '/public/index.html');
+// Connect to MongoDB
+mongoose.connect(process.env.MONGODB_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+  autoIndex: true, // Add this option to avoid MongoDB deprecation warning
 });
 
-// 404 handler for API routes
-app.use((req, res) => {
-  res.status(404).send('Not Found');
+mongoose.connection.on('connected', () => {
+  console.log('Connected to MongoDB');
 });
 
-// MongoDB connection established
-db.once('open', () => {
-  // Start server
-  app.listen(PORT, () => {
-    console.log(`API server running on port ${PORT}!`);
-  });
+mongoose.connection.on('error', (err) => {
+  console.error('MongoDB connection error:', err);
+});
+
+// Routes
+app.use('/api/users', require('./routes/api/userRoutes'));
+app.use('/api/thoughts', require('./routes/api/thoughtRoutes'));
+
+// Error handler
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({ message: 'Internal server error' });
+});
+
+// Start server
+app.listen(PORT, () => {
+  console.log(`Server running on http://localhost:${PORT}`);
 });

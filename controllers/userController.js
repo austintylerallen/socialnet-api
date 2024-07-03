@@ -1,71 +1,146 @@
-// controllers/userController.js
-
 const User = require('../models/User');
 
+// Controller functions
+
 // GET all users
-exports.getAllUsers = async (req, res) => {
+const getAllUsers = async (req, res) => {
   try {
     const users = await User.find();
     res.json(users);
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    console.error(err.message);
+    res.status(500).send('Server Error');
   }
 };
 
-// GET a single user by ID
-exports.getUserById = async (req, res) => {
-  const { userId } = req.params;
+// GET user by ID
+const getUserById = async (req, res) => {
   try {
-    const user = await User.findById(userId);
+    const user = await User.findById(req.params.id);
     if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+      return res.status(404).json({ msg: 'User not found' });
     }
     res.json(user);
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    console.error(err.message);
+    res.status(500).send('Server Error');
   }
 };
 
-// POST a new user
-exports.createUser = async (req, res) => {
+// POST new user
+const createUser = async (req, res) => {
   const { username, email } = req.body;
+
   try {
-    const newUser = await User.create({ username, email });
-    res.status(201).json(newUser);
+    let user = await User.findOne({ email });
+
+    if (user) {
+      return res.status(400).json({ msg: 'User already exists' });
+    }
+
+    user = new User({
+      username,
+      email,
+    });
+
+    await user.save();
+    res.json(user);
   } catch (err) {
-    res.status(400).json({ message: err.message });
+    console.error(err.message);
+    res.status(500).send('Server Error');
   }
 };
 
-// PUT update a user by ID
-exports.updateUser = async (req, res) => {
-  const { userId } = req.params;
+// PUT update user by ID
+const updateUser = async (req, res) => {
   const { username, email } = req.body;
+
   try {
-    const updatedUser = await User.findByIdAndUpdate(
-      userId,
-      { username, email },
-      { new: true }
-    );
-    if (!updatedUser) {
-      return res.status(404).json({ message: 'User not found' });
+    let user = await User.findById(req.params.id);
+
+    if (!user) {
+      return res.status(404).json({ msg: 'User not found' });
     }
-    res.json(updatedUser);
+
+    user.username = username;
+    user.email = email;
+
+    await user.save();
+    res.json(user);
   } catch (err) {
-    res.status(400).json({ message: err.message });
+    console.error(err.message);
+    res.status(500).send('Server Error');
   }
 };
 
-// DELETE delete a user by ID
-exports.deleteUser = async (req, res) => {
-  const { userId } = req.params;
+// DELETE user by ID
+const deleteUser = async (req, res) => {
   try {
-    const deletedUser = await User.findByIdAndDelete(userId);
-    if (!deletedUser) {
-      return res.status(404).json({ message: 'User not found' });
+    let user = await User.findById(req.params.id);
+
+    if (!user) {
+      return res.status(404).json({ msg: 'User not found' });
     }
-    res.json({ message: 'User deleted successfully' });
+
+    await user.remove();
+    res.json({ msg: 'User removed' });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    console.error(err.message);
+    res.status(500).send('Server Error');
   }
+};
+
+// POST add a new friend to user's friend list
+const addFriend = async (req, res) => {
+  const { userId, friendId } = req.params;
+
+  try {
+    let user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({ msg: 'User not found' });
+    }
+
+    if (!user.friends.includes(friendId)) {
+      user.friends.push(friendId);
+      await user.save();
+    }
+
+    res.json(user);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server Error');
+  }
+};
+
+// DELETE remove a friend from user's friend list
+const removeFriend = async (req, res) => {
+  const { userId, friendId } = req.params;
+
+  try {
+    let user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({ msg: 'User not found' });
+    }
+
+    user.friends = user.friends.filter(friend => friend.toString() !== friendId);
+
+    await user.save();
+
+    res.json(user);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server Error');
+  }
+};
+
+module.exports = {
+  getAllUsers,
+  getUserById,
+  createUser,
+  updateUser,
+  deleteUser,
+  addFriend,
+  removeFriend
 };
