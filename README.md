@@ -50,7 +50,7 @@ To run this project locally, follow these steps:
     bash
 
     `PORT=3001
-    MONGODB_URI=mongodb://localhost:27017/social-media-db`
+    MONGODB_URI=mongodb://localhost:27017/clusterreps`
 
 4.  Start the server:
 
